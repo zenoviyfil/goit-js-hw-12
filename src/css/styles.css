@@ -23,3 +23,53 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
 }
+
+.loader {
+  margin: 0% 50%;
+  width: 48px;
+  height: 48px;
+  border: 5px dotted red;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 2s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 
+
+.search-form {
+  display: flex;
+  justify-content: center;
+  margin: 10px;
+}
+
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+.gallery-item {
+  list-style-type: none;
+  border-style: solid;
+}
+
+.gallery-image {
+  width: 320px;
+  height: 200px;
+  object-fit: cover;
+}
+
+.gallery-item-description {
+  display: flex;
+  width: 320px;
+}
