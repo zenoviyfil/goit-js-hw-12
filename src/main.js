@@ -4,22 +4,32 @@ import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 import axios from 'axios';
 
-const API_URL = 'https://pixabay.com/api/';
-const API_KEY = '41812412-8184544d67aaee5dc545e6a16';
-const url = `${API_URL}?key=${API_KEY}`;
+// const API_URL = 'https://pixabay.com/api';
+// const API_KEY = '41812412-8184544d67aaee5dc545e6a16';
+axios.defaults.baseURL =
+  'https://pixabay.com/api/41812412-8184544d67aaee5dc545e6a16';
 
-const options = {
-  image_type: 'photo',
-  orientation: 'horizontal',
-  safesearch: true,
-};
-function fetchData(searchValue) {
-  return fetch(`${url}&q=${searchValue}`, options).then(resp => {
-    if (!resp.ok) {
-      throw new Error(resp.statusText);
+// const options = {
+//   image_type: 'photo',
+//   orientation: 'horizontal',
+//   safesearch: true,
+// };
+
+async function fetchData(searchValue) {
+  return await axios.get(
+    `&q=${searchValue}`,
+    {
+      params: {
+        image_type: 'photo',
+        orientation: 'horizontal',
+        safesearch: true,
+      }
     }
-    return resp.json();
-  });
+  );
+    // if (!resp.ok) {
+    //     throw new Error(resp.statusText);
+    // }
+    // return await resp.json();
 }
 
 const searchForm = document.querySelector('.search-form');
