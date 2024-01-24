@@ -7,8 +7,7 @@ import axios from 'axios';
 // const API_URL = 'https://pixabay.com/api';
 // const API_KEY = '41812412-8184544d67aaee5dc545e6a16';
 axios.defaults.baseURL =
-  'https://pixabay.com/api/?key=41812412-8184544d67aaee5dc545e6a16';
-
+  'https://pixabay.com/api/';
 // const options = {
 //   image_type: 'photo',
 //   orientation: 'horizontal',
@@ -16,9 +15,10 @@ axios.defaults.baseURL =
 // };
 
 async function fetchData(searchValue) {
-  return await axios.get(`&q=${searchValue}`, {
+  return await axios.get('', {
     params: {
-      // key: '1812412-8184544d67aaee5dc545e6a16',
+      key: '41812412-8184544d67aaee5dc545e6a16',
+      q: searchValue,
       image_type: 'photo',
       orientation: 'horizontal',
       safesearch: true,
@@ -55,12 +55,12 @@ function handleSearch(event) {
 }
 
 function render(data) {
-  if (data.hits.length === 0) {
+  if (data.data.hits.length === 0) {
     iziToast.error({
       message: `Sorry, there are no images matching your search query. Please try again!`,
     });
   }
-  gallery.innerHTML = createMarkup(data.hits);
+  gallery.innerHTML = createMarkup(data.data.hits);
   lightbox.refresh();
 }
 
