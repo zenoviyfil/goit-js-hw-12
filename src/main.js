@@ -7,7 +7,7 @@ import axios from 'axios';
 // const API_URL = 'https://pixabay.com/api';
 // const API_KEY = '41812412-8184544d67aaee5dc545e6a16';
 axios.defaults.baseURL =
-  'https://pixabay.com/api/41812412-8184544d67aaee5dc545e6a16';
+  'https://pixabay.com/api/?key=41812412-8184544d67aaee5dc545e6a16';
 
 // const options = {
 //   image_type: 'photo',
@@ -16,16 +16,14 @@ axios.defaults.baseURL =
 // };
 
 async function fetchData(searchValue) {
-  return await axios.get(
-    `&q=${searchValue}`,
-    {
-      params: {
-        image_type: 'photo',
-        orientation: 'horizontal',
-        safesearch: true,
-      }
-    }
-  );
+  return await axios.get(`&q=${searchValue}`, {
+    params: {
+      // key: '1812412-8184544d67aaee5dc545e6a16',
+      image_type: 'photo',
+      orientation: 'horizontal',
+      safesearch: true,
+    },
+  });
     // if (!resp.ok) {
     //     throw new Error(resp.statusText);
     // }
