@@ -77,6 +77,7 @@ async function handleLoadMore() {
     handleError(error);
   } finally {
     button.enable(refs.loadMoreBtn, refs.loader);
+    lightbox.refresh();
 
     window.scrollBy({ 
       top: box.height * 2, 
