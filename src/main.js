@@ -2,98 +2,103 @@ import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-import axios from 'axios';
 
-// const API_URL = 'https://pixabay.com/api';
-// const API_KEY = '41812412-8184544d67aaee5dc545e6a16';
-axios.defaults.baseURL =
-  'https://pixabay.com/api/';
-// const options = {
-//   image_type: 'photo',
-//   orientation: 'horizontal',
-//   safesearch: true,
-// };
+import { createMarkup } from './templates/markup.js';
+import { getData } from './services/api.js';
+import button from './services/button.js';
 
-async function fetchData(searchValue) {
-  return await axios.get('', {
-    params: {
-      key: '41812412-8184544d67aaee5dc545e6a16',
-      q: searchValue,
-      image_type: 'photo',
-      orientation: 'horizontal',
-      safesearch: true,
-    },
-  });
-    // if (!resp.ok) {
-    //     throw new Error(resp.statusText);
-    // }
-    // return await resp.json();
-}
+const refs = {
+  searchForm: document.querySelector('.search-form'),
+  gallery: document.querySelector('.gallery'),
+  loader: document.getElementById('loader'),
+  loadMoreBtn: document.querySelector('[data-action="load-more"]'),
+};
 
-const searchForm = document.querySelector('.search-form');
-const gallery = document.querySelector('.gallery');
-const loader = document.querySelector('.loader');
-loader.classList.remove('loader');
+const queryParams = {
+  query: '',
+  page: 1,
+  maxPage: 0,
+  per_page: 40,
+};
 
-searchForm.addEventListener('submit', handleSearch);
+refs.searchForm.addEventListener('submit', handleSearch);
 
-function handleSearch(event) {
+async function handleSearch(event) {
   event.preventDefault();
+  refs.gallery.innerHTML = '';
+  queryParams.page = 1;
+  button.hide(refs.loadMoreBtn);
 
   const form = event.currentTarget;
-  const searchValue = form.elements.query.value;
+  queryParams.query = form.elements.query.value.trim();
 
-  loader.classList.add('loader');
+  if (!queryParams.query) {
+    return;
+  }
 
-  fetchData(searchValue)
-    .then(render)
-    .catch(handleError)
-    .finally(() => {
-      form.reset();
-      loader.classList.remove('loader');
-    });
+  try {
+    const { hits, totalHits } = await getData(queryParams);
+    queryParams.maxPage = Math.ceil(totalHits / queryParams.per_page);
+    if (hits.length === 0) {
+      iziToast.error({
+        message: `Sorry, there are no images matching your search query. Please try again!`,
+      });
+    }
+
+    createMarkup(hits, refs.gallery);
+
+    if (hits.length > 0 && hits.length !== totalHits) {
+      button.show(refs.loadMoreBtn);
+      refs.loadMoreBtn.addEventListener('click', handleLoadMore);
+    } else {
+      button.hide(refs.loadMoreBtn);
+    }
+  } catch (error) {
+    handleError(error);
+  } finally {
+    form.reset();
+    lightbox.refresh();
+  }
 }
 
-function render(data) {
-  if (data.data.hits.length === 0) {
-    iziToast.error({
-      message: `Sorry, there are no images matching your search query. Please try again!`,
+async function handleLoadMore() {
+  queryParams.page += 1;
+  button.disable(refs.loadMoreBtn, refs.loader);
+  const box = document
+    .querySelector('.gallery-item')
+    .getBoundingClientRect();
+
+
+  try {
+    const { hits } = await getData(queryParams);
+    createMarkup(hits, refs.gallery);
+
+  } catch (error) {
+    handleError(error);
+  } finally {
+    button.enable(refs.loadMoreBtn, refs.loader);
+
+    window.scrollBy({ 
+      top: box.height * 2, 
+      left: 0, 
+      behavior: 'smooth', 
     });
+
+    if (queryParams.page === queryParams.maxPage) {
+      button.hide(refs.loadMoreBtn);
+      refs.loadMoreBtn.removeEventListener('click', handleLoadMore);
+
+      iziToast.info({
+        message: "We're sorry, but you've reached the end of search results.",
+      });
+    }
   }
-  gallery.innerHTML = createMarkup(data.data.hits);
-  lightbox.refresh();
 }
 
 function handleError(error) {
   iziToast.error({
     message: `Sorry, something went wrong. Please try again later!`,
   });
-}
-
-function createMarkup(arr) {
-  return arr
-    .map(
-      ({
-        largeImageURL,
-        webformatURL,
-        tags,
-        likes,
-        views,
-        downloads,
-        comments,
-      }) => `<li class="gallery-item">
-        <a href="${largeImageURL}">
-        <img class="gallery-image" src="${webformatURL}" alt="${tags}">
-            <ul class="gallery-item-description">
-                <li>Likes: ${likes}</li>
-                <li>Views: ${views}</li>
-                <li>Downloads: ${downloads}</li>
-                <li>Comments: ${comments}</li>
-            </ul>
-        </a>
-    </li>`
-    )
-    .join('');
 }
 
 let lightbox = new SimpleLightbox('.gallery a', {
